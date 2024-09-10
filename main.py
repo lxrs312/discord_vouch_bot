@@ -7,7 +7,7 @@ import stylesheet as style
 import json
 import os
 
-FILE_PATH = os.path.join(os.curdir, "vouches.json")
+FILE_PATH = os.path.join("./discord_vouch_bot", "vouches.json")
 
 STAR_CHOICES = [
     app_commands.Choice(name="⭐", value=1),
