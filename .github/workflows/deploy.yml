@@ -21,6 +21,7 @@ jobs:
         key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          set -e  # Stop the script on the first error
           cd ${{ secrets.AWS_PATH }}
           git pull origin master
           source bot-env/bin/activate
