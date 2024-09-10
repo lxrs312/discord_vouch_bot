@@ -1,0 +1,110 @@
+import discord
+from discord.ext import commands
+from discord import app_commands
+import localconfig as lf
+from datetime import datetime
+import stylesheet as style
+import json
+import os
+
+FILE_PATH = os.path.join(os.curdir, "vouches.json")
+
+STAR_CHOICES = [
+    app_commands.Choice(name="⭐", value=1),
+    app_commands.Choice(name="⭐⭐", value=2),
+    app_commands.Choice(name="⭐⭐⭐", value=3),
+    app_commands.Choice(name="⭐⭐⭐⭐", value=4),
+    app_commands.Choice(name="⭐⭐⭐⭐⭐", value=5),
+]
+
+intents = discord.Intents.default()
+client = discord.Client(intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=style.activity_text))
+tree = app_commands.CommandTree(client)
+
+
+def write_json(data: dict) -> str:
+    try:
+        with open(FILE_PATH, "w", encoding="utf8") as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        return f"Error writing to the JSON file: {e}"
+
+
+def load_json() -> tuple[dict, str]:
+    if os.path.exists(FILE_PATH):
+        try:
+            with open(FILE_PATH, 'r', encoding="utf8") as file:
+                return json.load(file), ""
+        except json.JSONDecodeError as e:
+            return {}, f"Error reading JSON file: {e}"
+    else:
+        return {}, ""
+
+
+def get_embed(star_string: str, comment: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
+    now = datetime.now()
+    embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
+
+    embed.add_field(name=style.vouch_comment_text, value=comment, inline=False)
+    embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
+    embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
+    embed.set_thumbnail(url=user.display_avatar)
+    embed.set_footer(text=client.user.name, icon_url=style.icon_url)
+    embed.set_image(url=image.url)
+
+    return embed
+
+@client.event
+async def on_ready():
+    await tree.sync(guild=discord.Object(id=lf.guild_id))  
+    print("Ready!")
+
+@tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=lf.guild_id))
+@app_commands.describe(stars=style.command_stars_description_text, comment=style.command_comment_description_text, image=style.command_image_description_text)
+@app_commands.choices(stars=STAR_CHOICES)
+async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comment: str, image: discord.Attachment):
+    await ctx.response.defer(thinking=True)
+
+    # load data
+    data, load_error = load_json()
+    if load_error:
+        await ctx.followup.send(f"Failed to load data: {load_error}. Please contact frosty999.", ephemeral=True)
+        return
+
+    # if no data ..
+    if data:
+        new_vouch_nr = int(max(data.keys())) + 1
+    else:
+        new_vouch_nr = 1
+
+    star_string = "⭐" * stars.value
+    now = datetime.now()
+
+    # validate images
+    if image is None or not image.content_type.startswith('image/'):
+        await ctx.followup.send(style.image_error_text, ephemeral=True)
+        return
+
+    embed = get_embed(star_string, comment, new_vouch_nr, ctx.user, image)
+
+    # add new entry
+    data[new_vouch_nr] = {
+        "date": now.strftime("%d/%m/%Y, %H:%M:%S"),
+        "comment": comment,
+        "user": ctx.user.id,
+        "stars": stars.value
+    }
+
+    # write data
+    write_error = write_json(data)
+    if write_error:
+        await ctx.followup.send(f"Failed to save data: {write_error}. Please contact frosty999.", ephemeral=True)
+        return
+
+    # change channel name to account for new_vouch
+    await ctx.channel.edit(name=f"🧊︱vouches-{new_vouch_nr}")
+    
+    # sendit
+    await ctx.followup.send(embed=embed)
+
+client.run(lf.discord_auth_token)
