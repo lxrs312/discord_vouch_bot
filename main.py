@@ -37,7 +37,7 @@ def write_json(data: dict) -> str:
         data (dict): data that gets written back
 
     Returns:
-        str: Exception (optional)
+        str: Exception as str (optional)
     """
     try:
         with open(FILE_PATH, "w", encoding="utf8") as f:
@@ -49,7 +49,7 @@ def load_json() -> tuple[dict, str]:
     """loading a json file into a dict
 
     Returns:
-        tuple[dict, str]: dictionary, Exception
+        tuple[dict, str]: dictionary, Exception as str
     """
     if os.path.exists(FILE_PATH):
         try:
