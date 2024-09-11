@@ -2,7 +2,9 @@ import pytest
 import json
 from unittest import mock
 from unittest.mock import patch, MagicMock
-from main import FILE_PATH, load_json, write_json
+import main
+
+FILE_PATH = "vouches.json"
 
 ### TESTS ###
 
@@ -13,7 +15,7 @@ def test_load_json_file_exists(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("os.path.exists", lambda x: True)
 
-    data, error = load_json()
+    data, error = main.load_json()
 
     assert error == None
     assert data == {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
@@ -22,7 +24,7 @@ def test_load_json_file_exists(monkeypatch):
 def test_load_json_file_does_not_exist(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda x: False)
 
-    data, error = load_json()
+    data, error = main.load_json()
 
     assert error == None
     assert data == {}
@@ -33,7 +35,7 @@ def test_load_json_file_corrupted(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("os.path.exists", lambda x: True)
 
-    data, error = load_json()
+    data, error = main.load_json()
 
     assert error != None
     assert data == {}
@@ -44,7 +46,7 @@ def test_write_json_success(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
-    error = write_json(data)
+    error = main.write_json(data)
 
     assert error == None
     mock_open.assert_called_once_with(FILE_PATH, "w", encoding="utf8")
@@ -55,7 +57,7 @@ def test_write_json_failure(monkeypatch):
     monkeypatch.setattr("builtins.open", mock.mock_open(side_effect=OSError("Permission denied")))
 
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
-    error = write_json(data)
+    error = main.write_json(data)
 
     assert "Permission denied" in error
 
