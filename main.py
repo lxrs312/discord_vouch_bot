@@ -18,9 +18,9 @@ STAR_CHOICES = [
 ]
 
 intents = discord.Intents.default()
-client = discord.Client(intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=style.activity_text))
-tree = app_commands.CommandTree(client)
-
+# client = discord.Client(intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
+client = commands.Bot(command_prefix=None, description=style.description, intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
+# tree = app_commands.CommandTree(client)
 
 def write_json(data: dict) -> str:
     try:
@@ -49,17 +49,17 @@ def get_embed(star_string: str, comment: str, new_vouch_nr: int, user: discord.U
     embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
     embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
     embed.set_thumbnail(url=user.display_avatar)
-    embed.set_footer(text=client.user.name, icon_url=style.icon_url)
+    embed.set_footer(text=client.user.name, icon_url=lf.icon_url)
     embed.set_image(url=image.url)
 
     return embed
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=lf.guild_id))  
+    await client.tree.sync(guild=discord.Object(id=lf.guild_id))  
     print("Ready!")
 
-@tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=lf.guild_id))
+@client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=lf.guild_id))
 @app_commands.describe(stars=style.command_stars_description_text, comment=style.command_comment_description_text, image=style.command_image_description_text)
 @app_commands.choices(stars=STAR_CHOICES)
 async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comment: str, image: discord.Attachment):
@@ -68,7 +68,7 @@ async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comme
     # load data
     data, load_error = load_json()
     if load_error:
-        await ctx.followup.send(f"Failed to load data: {load_error}. Please contact frosty999.", ephemeral=True)
+        await ctx.followup.send(style.save_json_error_text.format(load_error), ephemeral=True)
         return
 
     # if no data ..
@@ -89,7 +89,7 @@ async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comme
 
     # add new entry
     data[new_vouch_nr] = {
-        "date": now.strftime("%d/%m/%Y, %H:%M:%S"),
+        "date": now.strftime(style.date_format),
         "comment": comment,
         "user": ctx.user.id,
         "stars": stars.value
@@ -98,7 +98,7 @@ async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comme
     # write data
     write_error = write_json(data)
     if write_error:
-        await ctx.followup.send(f"Failed to save data: {write_error}. Please contact frosty999.", ephemeral=True)
+        await ctx.followup.send(style.save_json_error_text.format(write_error), ephemeral=True)
         return
 
     # change channel name to account for new_vouch
