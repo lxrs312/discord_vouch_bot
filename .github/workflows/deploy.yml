@@ -25,6 +25,8 @@ jobs:
           pip install pytest pytest-asyncio
 
       - name: Run unit tests
+        env:
+          PYTHONPATH: .
         run: |
           source bot-env/bin/activate
           pytest

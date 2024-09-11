@@ -2,7 +2,7 @@ import pytest
 import json
 from unittest import mock
 from unittest.mock import patch, MagicMock
-import discord_vouch_bot.main as main
+import main
 
 FILE_PATH = main.FILE_PATH
 
