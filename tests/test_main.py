@@ -63,7 +63,7 @@ def test_write_json_failure(monkeypatch):
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
     error = main.write_json(data)
 
-    assert "Permission denied" in error
+    assert "Permission denied" in str(error)
 
 
 # ### TEST FOR SLASH COMMANDS ###

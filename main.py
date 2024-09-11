@@ -27,7 +27,7 @@ env_vars = None  # both placesholders
 FILE_PATH = None
 
 intents = discord.Intents.default()
-client = commands.Bot(command_prefix="!!!", intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name="Test"))
+client = commands.Bot(command_prefix="!!!", intents=intents)
 
 def write_json(data: dict) -> str:
     try:
@@ -36,7 +36,7 @@ def write_json(data: dict) -> str:
     except Exception as e:
         return e
 
-def load_json() -> tuple[dict, Exception]:
+def load_json() -> tuple[dict, str]:
     if os.path.exists(FILE_PATH):
         try:
             with open(FILE_PATH, 'r', encoding="utf8") as file:
@@ -150,6 +150,8 @@ def run():
     env_vars = load_env_vars()  # Load environment variables at runtime
     FILE_PATH = set_file_path(env_vars["path_to_json"])  # Set the file path
     register_commands()  # Register the commands
+
+    client.activity=discord.Activity(type=discord.ActivityType(3), name=env_vars['activity_text'])
     client.run(env_vars["discord_token"])
 
 if __name__ == "__main__":
