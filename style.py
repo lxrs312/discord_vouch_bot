@@ -15,9 +15,10 @@ command_comment_description_text = "Please comment on the service."
 command_image_description_text = "Please provide a screenshot as proof."
 
 image_error_text = "The file you provided is not an image."
-load_json_error_text = "Failed to load data: {}. Please contact support."
-save_json_error_text = "Failed to save data: {}. Please contact support."
+json_error_text = "Something went wrong. Please contact support."
 wrong_channel_error_text = "Please refrain from using the Bot outside of the Vouches-Channel!"
 
 date_format = "%d/%m/%Y, %H:%M:%S"
+
+logging_format = '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
 
