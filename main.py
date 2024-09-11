@@ -23,11 +23,12 @@ STAR_CHOICES = [
     app_commands.Choice(name="⭐⭐⭐⭐⭐", value=5),
 ]
 
-env_vars = None  # both placesholders
+# both placesholders
+env_vars = None
 FILE_PATH = None
 
 intents = discord.Intents.default()
-client = commands.Bot(command_prefix="!!!", intents=intents)
+client = commands.Bot(command_prefix=style.command_prefix_text, intents=intents)
 
 def write_json(data: dict) -> str:
     try:
@@ -46,7 +47,7 @@ def load_json() -> tuple[dict, str]:
     else:
         return {}, None
  
-def load_env_vars():
+def load_env_vars() -> dict:
     logging.info("Loading environment variables.")
     load_dotenv()
     try:
@@ -54,7 +55,6 @@ def load_env_vars():
             "guild_id": int(os.getenv("GUILD_ID")),
             "discord_token": os.getenv("DISCORD_AUTH_TOKEN"),
             "channel_id": int(os.getenv("CHANNEL_ID")),
-            "command_prefix": os.getenv("COMMAND_PREFIX"),
             "activity_text": os.getenv("ACTIVITY_TEXT"),
             "icon_url": os.getenv("ICON_URL"),
             "path_to_json": os.getenv("PATH_TO_JSON"),
@@ -62,9 +62,6 @@ def load_env_vars():
     except (TypeError, ValueError):
         logging.error("Failed to load environment variables.")
         raise
-
-def set_file_path(path_to_json):
-    return os.path.join(os.curdir, path_to_json)
 
 def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
     now = datetime.now()
@@ -79,15 +76,18 @@ def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.U
     return embed
 
 @client.event
-async def on_ready():
+async def on_ready() -> None:
     await client.tree.sync(guild=discord.Object(id=env_vars['guild_id']))  
     logging.info("Connected to Discord.")
     
-def register_commands():
+def register_commands() -> None:
+    
+    # Vouch Command
+
     @client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=env_vars['guild_id']))
     @app_commands.describe(stars=style.command_stars_description_text, message=style.command_message_description_text, image=style.command_image_description_text)
     @app_commands.choices(stars=STAR_CHOICES)
-    async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, image: discord.Attachment):
+    async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, image: discord.Attachment) -> None:
         await ctx.response.defer(thinking=True)
         
         logging.info(f"Command {style.command_name_text} invoked by {ctx.user.name}")
@@ -144,11 +144,10 @@ def register_commands():
         
         logging.info(f"Successfully saved vouch {new_vouch_nr}.")
     
-    
-def run():
+def run() -> None:
     global env_vars, FILE_PATH
     env_vars = load_env_vars()  # Load environment variables at runtime
-    FILE_PATH = set_file_path(env_vars["path_to_json"])  # Set the file path
+    FILE_PATH = os.path.join(os.curdir, env_vars["path_to_json"])  # Set the file path
     register_commands()  # Register the commands
 
     client.activity=discord.Activity(type=discord.ActivityType(3), name=env_vars['activity_text'])
