@@ -2,12 +2,9 @@ import pytest
 import json
 from unittest import mock
 from unittest.mock import patch, MagicMock
-import main
-import os
 
-FILE_PATH = main.FILE_PATH
-
-@pytest.fixture(autouse=True)
+# Mock the environment variables BEFORE importing main
+@pytest.fixture(scope='module', autouse=True)
 def set_env_variables(monkeypatch):
     monkeypatch.setenv('DISCORD_AUTH_TOKEN', 'fake_token')
     monkeypatch.setenv('GUILD_ID', '123456789')
@@ -16,6 +13,13 @@ def set_env_variables(monkeypatch):
     monkeypatch.setenv('PATH_TO_JSON', 'test_vouches.json')
     monkeypatch.setenv('CHANNEL_ID', '987654321')
     monkeypatch.setenv('COMMAND_PREFIX', '!')
+
+# Now that the environment variables are mocked, import main.py
+import main
+
+FILE_PATH = main.FILE_PATH
+
+### TESTS ###
 
 ### TEST FOR JSON FUNCTIONS ###
 
