@@ -45,26 +45,7 @@ def load_json() -> tuple[dict, str]:
             return {}, e
     else:
         return {}, None
-
-
-def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
-    now = datetime.now()
-    embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
-    embed.add_field(name=style.vouch_message_text, value=message, inline=False)
-    embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
-    embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
-    embed.set_thumbnail(url=user.display_avatar)
-    embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
-    embed.set_image(url=image.url)
-
-    return embed
-
-@client.event
-async def on_ready():
-    await client.tree.sync(guild=discord.Object(id=env_vars['guild_id']))  
-    logging.info("Connected to Discord.")
-
-    
+ 
 def load_env_vars():
     logging.info("Loading environment variables.")
     load_dotenv()
@@ -85,6 +66,22 @@ def load_env_vars():
 def set_file_path(path_to_json):
     return os.path.join(os.curdir, path_to_json)
 
+def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
+    now = datetime.now()
+    embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
+    embed.add_field(name=style.vouch_message_text, value=message, inline=False)
+    embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
+    embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
+    embed.set_thumbnail(url=user.display_avatar)
+    embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
+    embed.set_image(url=image.url)
+
+    return embed
+
+@client.event
+async def on_ready():
+    await client.tree.sync(guild=discord.Object(id=env_vars['guild_id']))  
+    logging.info("Connected to Discord.")
     
 def register_commands():
     @client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=env_vars['guild_id']))

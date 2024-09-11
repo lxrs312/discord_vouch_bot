@@ -4,8 +4,6 @@ from unittest import mock
 from unittest.mock import patch, MagicMock
 import main
 
-FILE_PATH = "vouches.json"
-
 ### TESTS ###
 
 ### TEST FOR JSON FUNCTIONS ###
@@ -49,7 +47,7 @@ def test_write_json_success(monkeypatch):
     error = main.write_json(data)
 
     assert error == None
-    mock_open.assert_called_once_with(FILE_PATH, "w", encoding="utf8")
+    mock_open.assert_called_once_with(main.FILE_PATH, "w", encoding="utf8")
     mock_open().write.assert_called_once_with(json.dumps(data, indent=4))
 
 
