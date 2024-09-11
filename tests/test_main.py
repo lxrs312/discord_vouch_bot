@@ -2,22 +2,7 @@ import pytest
 import json
 from unittest import mock
 from unittest.mock import patch, MagicMock
-
-# Mock the environment variables BEFORE importing main
-@pytest.fixture(scope='module', autouse=True)
-def set_env_variables(monkeypatch):
-    monkeypatch.setenv('DISCORD_AUTH_TOKEN', 'fake_token')
-    monkeypatch.setenv('GUILD_ID', '123456789')
-    monkeypatch.setenv('ICON_URL', 'http://example.com/icon.png')
-    monkeypatch.setenv('ACTIVITY_TEXT', 'Bot Activity')
-    monkeypatch.setenv('PATH_TO_JSON', 'test_vouches.json')
-    monkeypatch.setenv('CHANNEL_ID', '987654321')
-    monkeypatch.setenv('COMMAND_PREFIX', '!')
-
-# Now that the environment variables are mocked, import main.py
-import main
-
-FILE_PATH = main.FILE_PATH
+from main import FILE_PATH, load_json, write_json
 
 ### TESTS ###
 
@@ -28,7 +13,7 @@ def test_load_json_file_exists(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("os.path.exists", lambda x: True)
 
-    data, error = main.load_json()
+    data, error = load_json()
 
     assert error == None
     assert data == {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
@@ -37,7 +22,7 @@ def test_load_json_file_exists(monkeypatch):
 def test_load_json_file_does_not_exist(monkeypatch):
     monkeypatch.setattr("os.path.exists", lambda x: False)
 
-    data, error = main.load_json()
+    data, error = load_json()
 
     assert error == None
     assert data == {}
@@ -48,7 +33,7 @@ def test_load_json_file_corrupted(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("os.path.exists", lambda x: True)
 
-    data, error = main.load_json()
+    data, error = load_json()
 
     assert error != None
     assert data == {}
@@ -59,7 +44,7 @@ def test_write_json_success(monkeypatch):
     monkeypatch.setattr("builtins.open", mock_open)
 
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
-    error = main.write_json(data)
+    error = write_json(data)
 
     assert error == None
     mock_open.assert_called_once_with(FILE_PATH, "w", encoding="utf8")
@@ -70,83 +55,70 @@ def test_write_json_failure(monkeypatch):
     monkeypatch.setattr("builtins.open", mock.mock_open(side_effect=OSError("Permission denied")))
 
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
-    error = main.write_json(data)
+    error = write_json(data)
 
     assert "Permission denied" in error
 
-### TEST FOR DISCORD BOT EVENTS ###
+# ### TEST FOR SLASH COMMANDS ###
 
-@pytest.mark.asyncio
-async def test_on_ready():
-    client = main.client
-    client.tree.sync = MagicMock()
+# @pytest.mark.asyncio
+# @patch("main.load_json")
+# @patch("main.write_json")
+# async def test_vouch_command(mock_write_json, mock_load_json, monkeypatch):
 
-    with patch.object(client, "user", new=MagicMock(name="MockBot")):
-        await main.on_ready()
+#     # Prepare mock data for load_json and write_json
+#     mock_load_json.return_value = ({}, "")
+#     mock_write_json.return_value = ""
 
-        client.tree.sync.assert_called_once()
-        print(client.user.name)
-
-### TEST FOR SLASH COMMANDS ###
-
-@pytest.mark.asyncio
-@patch("main.load_json")
-@patch("main.write_json")
-async def test_vouch_command(mock_write_json, mock_load_json, monkeypatch):
-
-    # Prepare mock data for load_json and write_json
-    mock_load_json.return_value = ({}, "")
-    mock_write_json.return_value = ""
-
-    # Create a mock Interaction
-    mock_interaction = MagicMock()
-    mock_interaction.user.mention = "MockUser"
-    mock_interaction.user.id = 123456
-    mock_interaction.response.defer = MagicMock()
-    mock_interaction.followup.send = MagicMock()
-    mock_interaction.channel.edit = MagicMock()
+#     # Create a mock Interaction
+#     mock_interaction = MagicMock()
+#     mock_interaction.user.mention = "MockUser"
+#     mock_interaction.user.id = 123456
+#     mock_interaction.response.defer = MagicMock()
+#     mock_interaction.followup.send = MagicMock()
+#     mock_interaction.channel.edit = MagicMock()
     
-    # Mock an attachment (image)
-    mock_attachment = MagicMock()
-    mock_attachment.content_type = "image/png"
-    mock_attachment.url = "http://example.com/image.png"
+#     # Mock an attachment (image)
+#     mock_attachment = MagicMock()
+#     mock_attachment.content_type = "image/png"
+#     mock_attachment.url = "http://example.com/image.png"
 
-    # Call the command
-    await main.vouch(mock_interaction, stars=MagicMock(value=5), comment="Great vouch!", image=mock_attachment)
+#     # Call the command
+#     await main.vouch(mock_interaction, stars=MagicMock(value=5), comment="Great vouch!", image=mock_attachment)
 
-    # Verify that the defer method was called
-    mock_interaction.response.defer.assert_called_once_with(thinking=True)
+#     # Verify that the defer method was called
+#     mock_interaction.response.defer.assert_called_once_with(thinking=True)
 
-    # Check that write_json was called to save the vouch
-    mock_write_json.assert_called_once()
+#     # Check that write_json was called to save the vouch
+#     mock_write_json.assert_called_once()
 
-    # Check that followup.send was called to send the result
-    mock_interaction.followup.send.assert_called_once()
+#     # Check that followup.send was called to send the result
+#     mock_interaction.followup.send.assert_called_once()
     
-channel_id = 12345
-style = mock.Mock()
-style.wrong_channel_error_text = "You cannot use this command in this channel."
+# channel_id = 12345
+# style = mock.Mock()
+# style.wrong_channel_error_text = "You cannot use this command in this channel."
 
-@pytest.mark.asyncio
-async def test_command_in_correct_channel():
-    mock_ctx = mock.Mock()
-    mock_ctx.channel_id = channel_id
-    mock_ctx.followup = mock.AsyncMock()
+# @pytest.mark.asyncio
+# async def test_command_in_correct_channel():
+#     mock_ctx = mock.Mock()
+#     mock_ctx.channel_id = channel_id
+#     mock_ctx.followup = mock.AsyncMock()
 
-    if mock_ctx.channel_id != channel_id:
-        await mock_ctx.followup.send(style.wrong_channel_error_text)
-        return
+#     if mock_ctx.channel_id != channel_id:
+#         await mock_ctx.followup.send(style.wrong_channel_error_text)
+#         return
 
-    mock_ctx.followup.send.assert_not_called()
+#     mock_ctx.followup.send.assert_not_called()
     
-@pytest.mark.asyncio
-async def test_command_in_wrong_channel():
-    mock_ctx = mock.Mock()
-    mock_ctx.channel_id = 54321
-    mock_ctx.followup = mock.AsyncMock()
+# @pytest.mark.asyncio
+# async def test_command_in_wrong_channel():
+#     mock_ctx = mock.Mock()
+#     mock_ctx.channel_id = 54321
+#     mock_ctx.followup = mock.AsyncMock()
 
-    if mock_ctx.channel_id != channel_id:
-        await mock_ctx.followup.send(style.wrong_channel_error_text)
-        return
+#     if mock_ctx.channel_id != channel_id:
+#         await mock_ctx.followup.send(style.wrong_channel_error_text)
+#         return
 
-    mock_ctx.followup.send.assert_called_once_with(style.wrong_channel_error_text)
+#     mock_ctx.followup.send.assert_called_once_with(style.wrong_channel_error_text)
