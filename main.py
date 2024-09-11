@@ -54,13 +54,16 @@ def get_embed(star_string: str, comment: str, new_vouch_nr: int, user: discord.U
 @client.event
 async def on_ready():
     await client.tree.sync(guild=discord.Object(id=lf.guild_id))  
-    print("Ready!")
 
 @client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=lf.guild_id))
 @app_commands.describe(stars=style.command_stars_description_text, comment=style.command_comment_description_text, image=style.command_image_description_text)
 @app_commands.choices(stars=STAR_CHOICES)
 async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comment: str, image: discord.Attachment):
     await ctx.response.defer(thinking=True)
+    
+    if ctx.channel_id != lf.channel_id:
+        await ctx.followup.send(style.wrong_channel_error_text)
+        return
 
     # load data
     data, load_error = load_json()
@@ -99,7 +102,7 @@ async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comme
         return
 
     # change channel name to account for new_vouch
-    await ctx.channel.edit(name=f"🧊︱vouches-{new_vouch_nr}")
+    await ctx.channel.edit(name=style.vouch_channel_name.format(new_vouch_nr))
     
     # sendit
     await ctx.followup.send(embed=embed)
