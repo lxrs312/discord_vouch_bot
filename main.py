@@ -36,11 +36,11 @@ def write_json(data: dict) -> str:
     except Exception as e:
         return e
 
-def load_json() -> tuple[dict, str]:
+def load_json() -> tuple[dict, Exception]:
     if os.path.exists(FILE_PATH):
         try:
             with open(FILE_PATH, 'r', encoding="utf8") as file:
-                return json.load(file), ""
+                return json.load(file), None
         except json.JSONDecodeError as e:
             return {}, e
     else:

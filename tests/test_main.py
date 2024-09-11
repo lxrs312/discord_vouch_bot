@@ -46,18 +46,25 @@ def test_write_json_success(monkeypatch):
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
     error = main.write_json(data)
 
-    assert error == None
+    assert error is None
     mock_open.assert_called_once_with(main.FILE_PATH, "w", encoding="utf8")
-    mock_open().write.assert_called_once_with(json.dumps(data, indent=4))
+
+    # Collect all the data written and compare it with the expected JSON
+    written_data = "".join(call.args[0] for call in mock_open().write.call_args_list)
+    assert written_data == json.dumps(data, indent=4)
 
 
 def test_write_json_failure(monkeypatch):
-    monkeypatch.setattr("builtins.open", mock.mock_open(side_effect=OSError("Permission denied")))
+    def raise_oserror(*args, **kwargs):
+        raise OSError("Permission denied")
+
+    monkeypatch.setattr("builtins.open", raise_oserror)
 
     data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
     error = main.write_json(data)
 
     assert "Permission denied" in error
+
 
 # ### TEST FOR SLASH COMMANDS ###
 
