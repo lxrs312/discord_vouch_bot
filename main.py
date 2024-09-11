@@ -31,6 +31,14 @@ intents = discord.Intents.default()
 client = commands.Bot(command_prefix=style.command_prefix_text, intents=intents)
 
 def write_json(data: dict) -> str:
+    """writing to a json-file
+
+    Args:
+        data (dict): data that gets written back
+
+    Returns:
+        str: Exception (optional)
+    """
     try:
         with open(FILE_PATH, "w", encoding="utf8") as f:
             json.dump(data, f, indent=4)
@@ -38,6 +46,11 @@ def write_json(data: dict) -> str:
         return e
 
 def load_json() -> tuple[dict, str]:
+    """loading a json file into a dict
+
+    Returns:
+        tuple[dict, str]: dictionary, Exception
+    """
     if os.path.exists(FILE_PATH):
         try:
             with open(FILE_PATH, 'r', encoding="utf8") as file:
@@ -48,6 +61,11 @@ def load_json() -> tuple[dict, str]:
         return {}, None
  
 def load_env_vars() -> dict:
+    """loading the env_vars from the .env
+
+    Returns:
+        dict: env_vars as dict
+    """
     logging.info("Loading environment variables.")
     load_dotenv()
     try:
@@ -64,6 +82,18 @@ def load_env_vars() -> dict:
         raise
 
 def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
+    """returns the embed that will be sent after a vouch has been received
+
+    Args:
+        star_string (str): star emojis concatinated as a string
+        message (str): user_message
+        new_vouch_nr (int): new_vouch_nr 
+        user (discord.User): user that invoked the command
+        image (discord.Attachment): user screenshot
+
+    Returns:
+        discord.Embed: embed that gets returned
+    """
     now = datetime.now()
     embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
     embed.add_field(name=style.vouch_message_text, value=message, inline=False)
@@ -77,10 +107,14 @@ def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.U
 
 @client.event
 async def on_ready() -> None:
+    """whenever the bot is ready..
+    """
     await client.tree.sync(guild=discord.Object(id=env_vars['guild_id']))  
     logging.info("Connected to Discord.")
     
 def register_commands() -> None:
+    """command gets called to add commands to bot, used this way because of auto-unit-tests, but looks crappy.
+    """
     
     # Vouch Command
 
@@ -88,6 +122,14 @@ def register_commands() -> None:
     @app_commands.describe(stars=style.command_stars_description_text, message=style.command_message_description_text, image=style.command_image_description_text)
     @app_commands.choices(stars=STAR_CHOICES)
     async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, image: discord.Attachment) -> None:
+        """vouch_command
+
+        Args:
+            ctx (discord.Interaction): context of command invocation
+            stars (app_commands.Choice[int]): option picked by user
+            message (str): message delivered by user
+            image (discord.Attachment): screenshot of user
+        """
         await ctx.response.defer(thinking=True)
         
         logging.info(f"Command {style.command_name_text} invoked by {ctx.user.name}")
@@ -145,10 +187,12 @@ def register_commands() -> None:
         logging.info(f"Successfully saved vouch {new_vouch_nr}.")
     
 def run() -> None:
+    """called to start the bot
+    """
     global env_vars, FILE_PATH
-    env_vars = load_env_vars()  # Load environment variables at runtime
-    FILE_PATH = os.path.join(os.curdir, env_vars["path_to_json"])  # Set the file path
-    register_commands()  # Register the commands
+    env_vars = load_env_vars()
+    FILE_PATH = os.path.join(os.curdir, env_vars["path_to_json"])
+    register_commands()
 
     client.activity=discord.Activity(type=discord.ActivityType(3), name=env_vars['activity_text'])
     client.run(env_vars["discord_token"])

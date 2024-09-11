@@ -40,8 +40,8 @@ CHANNEL_ID=your_channel_id
 
 ### 4. Set Up AWS Deployment (optional)
 
-1. List item Generate SSH-keys
-2.  Add keys to GitHub secrets
+1. Generate SSH-keys
+2. Add keys to GitHub secrets
 
 ```env
 AWS_HOST
