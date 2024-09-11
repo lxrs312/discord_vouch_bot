@@ -57,10 +57,10 @@ def load_json() -> tuple[dict, str]:
         return {}, None
 
 
-def get_embed(star_string: str, comment: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
+def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
     now = datetime.now()
     embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
-    embed.add_field(name=style.vouch_comment_text, value=comment, inline=False)
+    embed.add_field(name=style.vouch_message_text, value=message, inline=False)
     embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
     embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
     embed.set_thumbnail(url=user.display_avatar)
@@ -75,9 +75,9 @@ async def on_ready():
     logging.info("Connected to Discord.")
 
 @client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=guild_id))
-@app_commands.describe(stars=style.command_stars_description_text, comment=style.command_comment_description_text, image=style.command_image_description_text)
+@app_commands.describe(stars=style.command_stars_description_text, message=style.command_message_description_text, image=style.command_image_description_text)
 @app_commands.choices(stars=STAR_CHOICES)
-async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comment: str, image: discord.Attachment):
+async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, image: discord.Attachment):
     await ctx.response.defer(thinking=True)
     
     logging.info(f"Command {style.command_name_text} invoked by {ctx.user.name}")
@@ -109,12 +109,12 @@ async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comme
         await ctx.followup.send(style.image_error_text, ephemeral=True)
         return
 
-    embed = get_embed(star_string, comment, new_vouch_nr, ctx.user, image)
+    embed = get_embed(star_string, message, new_vouch_nr, ctx.user, image)
 
     # add new entry
     data[new_vouch_nr] = {
         "date": now.strftime(style.date_format),
-        "comment": comment,
+        "message": message,
         "user": ctx.user.id,
         "stars": stars.value
     }
