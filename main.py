@@ -7,7 +7,7 @@ import stylesheet as style
 import json
 import os
 
-FILE_PATH = os.path.join(os.curdir, "vouches.json")
+FILE_PATH = os.path.join(os.curdir, lf.path_to_json)
 
 STAR_CHOICES = [
     app_commands.Choice(name="⭐", value=1),
@@ -18,9 +18,7 @@ STAR_CHOICES = [
 ]
 
 intents = discord.Intents.default()
-# client = discord.Client(intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
-client = commands.Bot(command_prefix=None, description=style.description, intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
-# tree = app_commands.CommandTree(client)
+client = commands.Bot(command_prefix=None, intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
 
 def write_json(data: dict) -> str:
     try:
@@ -44,7 +42,6 @@ def load_json() -> tuple[dict, str]:
 def get_embed(star_string: str, comment: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
     now = datetime.now()
     embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
-
     embed.add_field(name=style.vouch_comment_text, value=comment, inline=False)
     embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
     embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)

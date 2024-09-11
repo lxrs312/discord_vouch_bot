@@ -1,4 +1,3 @@
-description = "This bot is open-sourced."
 color = 0x0094f5
 
 vouch_title_text = "Vouch received!"
