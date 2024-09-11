@@ -18,7 +18,7 @@ STAR_CHOICES = [
 ]
 
 intents = discord.Intents.default()
-client = commands.Bot(command_prefix=None, intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
+client = commands.Bot(command_prefix=lf.command_prefix, intents=intents, activity=discord.Activity(type=discord.ActivityType(3), name=lf.activity_text))
 
 def write_json(data: dict) -> str:
     try:
@@ -60,7 +60,7 @@ async def on_ready():
 @app_commands.choices(stars=STAR_CHOICES)
 async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], comment: str, image: discord.Attachment):
     await ctx.response.defer(thinking=True)
-    
+
     if ctx.channel_id != lf.channel_id:
         await ctx.followup.send(style.wrong_channel_error_text)
         return
