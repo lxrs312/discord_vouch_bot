@@ -3,8 +3,19 @@ import json
 from unittest import mock
 from unittest.mock import patch, MagicMock
 import main
+import os
 
 FILE_PATH = main.FILE_PATH
+
+@pytest.fixture(autouse=True)
+def set_env_variables(monkeypatch):
+    monkeypatch.setenv('DISCORD_AUTH_TOKEN', 'fake_token')
+    monkeypatch.setenv('GUILD_ID', '123456789')
+    monkeypatch.setenv('ICON_URL', 'http://example.com/icon.png')
+    monkeypatch.setenv('ACTIVITY_TEXT', 'Bot Activity')
+    monkeypatch.setenv('PATH_TO_JSON', 'test_vouches.json')
+    monkeypatch.setenv('CHANNEL_ID', '987654321')
+    monkeypatch.setenv('COMMAND_PREFIX', '!')
 
 ### TEST FOR JSON FUNCTIONS ###
 
@@ -78,14 +89,6 @@ async def test_on_ready():
 @patch("main.load_json")
 @patch("main.write_json")
 async def test_vouch_command(mock_write_json, mock_load_json, monkeypatch):
-    # Mock environment variables
-    monkeypatch.setenv("DISCORD_AUTH_TOKEN", "mock_token")
-    monkeypatch.setenv("GUILD_ID", "123456789")
-    monkeypatch.setenv("ICON_URL", "http://example.com/icon.png")
-    monkeypatch.setenv("ACTIVITY_TEXT", "Mocking environment variables")
-    monkeypatch.setenv("PATH_TO_JSON", "./mock_vouches.json")
-    monkeypatch.setenv("CHANNEL_ID", "987654321")
-    monkeypatch.setenv("COMMAND_PREFIX", "!")
 
     # Prepare mock data for load_json and write_json
     mock_load_json.return_value = ({}, "")
