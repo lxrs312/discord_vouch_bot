@@ -81,7 +81,7 @@ def load_env_vars() -> dict:
         logging.error("Failed to load environment variables.")
         raise
 
-def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
+def get_embed(star_string: str, message: str, product: str, new_vouch_nr: int, user: discord.User, image: discord.Attachment) -> discord.Embed:
     """returns the embed that will be sent after a vouch has been received
 
     Args:
@@ -99,6 +99,7 @@ def get_embed(star_string: str, message: str, new_vouch_nr: int, user: discord.U
     embed.add_field(name=style.vouch_message_text, value=message, inline=False)
     embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
     embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
+    embed.add_field(name=style.vouch_product, value=product, inline=True)
     embed.set_thumbnail(url=user.display_avatar)
     embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
     embed.set_image(url=image.url)
@@ -119,9 +120,9 @@ def register_commands() -> None:
     # Vouch Command
 
     @client.tree.command(name=style.command_name_text, description=style.command_description_text, guild=discord.Object(id=env_vars['guild_id']))
-    @app_commands.describe(stars=style.command_stars_description_text, message=style.command_message_description_text, image=style.command_image_description_text)
+    @app_commands.describe(stars=style.command_stars_description_text, message=style.command_message_description_text, product=style.command_product_description_text, image=style.command_image_description_text)
     @app_commands.choices(stars=STAR_CHOICES)
-    async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, image: discord.Attachment) -> None:
+    async def vouch(ctx: discord.Interaction, stars: app_commands.Choice[int], message: str, product: str, image: discord.Attachment) -> None:
         """vouch_command
 
         Args:
@@ -161,12 +162,13 @@ def register_commands() -> None:
             await ctx.followup.send(style.image_error_text, ephemeral=True)
             return
 
-        embed = get_embed(star_string, message, new_vouch_nr, ctx.user, image)
+        embed = get_embed(star_string, message, product, new_vouch_nr, ctx.user, image)
 
         # add new entry
         data[new_vouch_nr] = {
             "date": now.strftime(style.date_format),
             "message": message,
+            "product": product,
             "user": ctx.user.id,
             "stars": stars.value
         }

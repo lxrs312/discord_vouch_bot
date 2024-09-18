@@ -9,14 +9,14 @@ import main
 ### TEST FOR JSON FUNCTIONS ###
 
 def test_load_json_file_exists(monkeypatch):
-    mock_open = mock.mock_open(read_data='{"1": {"stars": 5, "comment": "Great job!", "user": 12345}}')
+    mock_open = mock.mock_open(read_data='{"1": {"stars": 5, "message": "Great job!", "product": "r6", "user": 12345}}')
     monkeypatch.setattr("builtins.open", mock_open)
     monkeypatch.setattr("os.path.exists", lambda x: True)
 
     data, error = main.load_json()
 
     assert error == None
-    assert data == {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
+    assert data == {"1": {"stars": 5, "message": "Great job!", "product": "r6", "user": 12345}}
 
 
 def test_load_json_file_does_not_exist(monkeypatch):
@@ -43,7 +43,7 @@ def test_write_json_success(monkeypatch):
     mock_open = mock.mock_open()
     monkeypatch.setattr("builtins.open", mock_open)
 
-    data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
+    data = {"1": {"stars": 5, "message": "Great job!", "product": "r6", "user": 12345}}
     error = main.write_json(data)
 
     assert error is None
@@ -60,7 +60,7 @@ def test_write_json_failure(monkeypatch):
 
     monkeypatch.setattr("builtins.open", raise_oserror)
 
-    data = {"1": {"stars": 5, "comment": "Great job!", "user": 12345}}
+    data = {"1": {"stars": 5, "message": "Great job!", "product": "r6", "user": 12345}}
     error = main.write_json(data)
 
     assert "Permission denied" in str(error)
