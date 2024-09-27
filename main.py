@@ -186,7 +186,7 @@ def register_commands() -> None:
         # sendit
         message: discord.WebhookMessage = await ctx.followup.send(embed=embed, wait=True)
         
-        message.add_reaction("<a:azulcoroainf24:1252338853835182210>")
+        await message.add_reaction("<a:azulcoroainf24:1252338853835182210>")
         
         logging.info(f"Successfully saved vouch {new_vouch_nr}.")
     
