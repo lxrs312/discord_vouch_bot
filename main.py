@@ -27,6 +27,12 @@ STAR_CHOICES = [
 env_vars = None
 FILE_PATH = None
 
+class VERIFY(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        button = discord.ui.Button(label='Please verify here!', style=discord.ButtonStyle.blurple, url=env_vars['VERIFY_URL'])
+        self.add_item(button)
+
 intents = discord.Intents.default()
 client = commands.Bot(command_prefix=style.command_prefix_text, intents=intents)
 
@@ -104,6 +110,17 @@ def get_embed(star_string: str, message: str, product: str, new_vouch_nr: int, u
     embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
     embed.set_image(url=image.url)
 
+    return embed
+
+def get_verify_embed():
+    now = datetime.now()
+    embed = discord.Embed(title="Back up this Server via clicking on the Button below!",
+                      description="This will allow us to pull you into a new server, whenever anything happens to this one.",
+                      colour=style.color, timestamp=now)
+
+    embed.set_author(name=client.user.name)
+    #embed.set_image(url="https://i.postimg.cc/Z55DLGTg/backup.png")
+    embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
     return embed
 
 @client.event
@@ -190,6 +207,21 @@ def register_commands() -> None:
         
         logging.info(f"Successfully saved vouch {new_vouch_nr}.")
     
+    @client.tree.command(name="verify_embed", description="Sends a verification embed with a button", guild=discord.Object(id=env_vars['guild_id']))
+    async def verify_embed(ctx: discord.Interaction) -> None:
+
+        if not ctx.user.guild_permissions.administrator:
+            await ctx.response.send_message("You do not have permission to use this command.", ephemeral=True)
+
+        # Defer the response (shows bot is thinking)
+        await ctx.response.defer()
+
+        # Create the embed that will be sent
+        embed = get_verify_embed()
+
+        # Send the embed along with the view (which contains the button)
+        await ctx.followup.send(embed=embed, view=VERIFY())
+
 def run() -> None:
     """called to start the bot
     """

@@ -11,6 +11,9 @@ vouch_channel_name = "🧊︱vouches-{}"
 command_name_text = "vouch"
 command_description_text = "Please leave a review for the services provided!"
 
+command_verify_name_text = "verify_embed"
+command_verify_description_text = "Returns the verify embed."
+
 command_stars_description_text = "Amount of stars you would evaluate the service with."
 command_message_description_text = "Please leave a message."
 command_image_description_text = "Please provide a screenshot as proof."
