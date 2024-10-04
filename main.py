@@ -28,9 +28,9 @@ env_vars = None
 FILE_PATH = None
 
 class VERIFY(discord.ui.View):
-    def __init__(self):
+    def __init__(self, verify_url):
         super().__init__()
-        button = discord.ui.Button(label='Please verify here!', style=discord.ButtonStyle.blurple, url=env_vars['VERIFY_URL'])
+        button = discord.ui.Button(label='Please verify here!', style=discord.ButtonStyle.blurple, url=verify_url)
         self.add_item(button)
 
 intents = discord.Intents.default()
@@ -82,6 +82,7 @@ def load_env_vars() -> dict:
             "activity_text": os.getenv("ACTIVITY_TEXT"),
             "icon_url": os.getenv("ICON_URL"),
             "path_to_json": os.getenv("PATH_TO_JSON"),
+            "verify_url": os.getenv("VERIFY_URL")
         }
     except (TypeError, ValueError):
         logging.error("Failed to load environment variables.")
@@ -220,7 +221,7 @@ def register_commands() -> None:
         embed = get_verify_embed()
 
         # Send the embed along with the view (which contains the button)
-        await ctx.followup.send(embed=embed, view=VERIFY())
+        await ctx.followup.send(embed=embed, view=VERIFY(env_vars['verify_url']))
 
 def run() -> None:
     """called to start the bot
