@@ -82,7 +82,8 @@ def load_env_vars() -> dict:
             "activity_text": os.getenv("ACTIVITY_TEXT"),
             "icon_url": os.getenv("ICON_URL"),
             "path_to_json": os.getenv("PATH_TO_JSON"),
-            "verify_url": os.getenv("VERIFY_URL")
+            "verify_url": os.getenv("VERIFY_URL"),
+            "verify_backup_image": os.getenv('VERIFY_BACKUP_IMAGE')
         }
     except (TypeError, ValueError):
         logging.error("Failed to load environment variables.")
@@ -120,7 +121,7 @@ def get_verify_embed():
                       colour=style.color, timestamp=now)
 
     embed.set_author(name=client.user.name)
-    #embed.set_image(url="https://i.postimg.cc/Z55DLGTg/backup.png")
+    embed.set_image(url=env_vars['verify_backup_image'])
     embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
     return embed
 
