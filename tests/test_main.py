@@ -48,7 +48,7 @@ def test_write_json_success(monkeypatch):
     error = main.write_json(data, file_path)
 
     assert error is None
-    mock_open.assert_called_once_with(main.FILE_PATH, "w", encoding="utf8")
+    mock_open.assert_called_once_with(file_path, "w", encoding="utf8")
 
     # Collect all the data written and compare it with the expected JSON
     written_data = "".join(call.args[0] for call in mock_open().write.call_args_list)
