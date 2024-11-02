@@ -106,11 +106,15 @@ def get_embed(star_string: str, message: str, product: str, new_vouch_nr: int, u
     embed = discord.Embed(title=style.vouch_title_text, description=star_string, colour=style.color, timestamp=now)
     embed.add_field(name=style.vouch_message_text, value=message, inline=False)
     embed.add_field(name=style.vouch_nr_text, value=new_vouch_nr, inline=True)
-    embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
+    if user:
+        embed.add_field(name=style.vouch_by_text, value=f"{user.mention}", inline=True)
+        embed.set_thumbnail(url=user.display_avatar)
+        embed.set_thumbnail(url=user.display_avatar)
+
+    if image:
+        embed.set_image(url=image.url)
     embed.add_field(name=style.vouch_product, value=product, inline=True)
-    embed.set_thumbnail(url=user.display_avatar)
     embed.set_footer(text=client.user.name, icon_url=env_vars['icon_url'])
-    embed.set_image(url=image.url)
 
     return embed
 
@@ -169,7 +173,7 @@ async def on_ready() -> None:
     """whenever the bot is ready..
     """
     await client.tree.sync(guild=discord.Object(id=env_vars['guild_id']))  
-    logging.info("Connected to Discord.")
+    logging.info("Connected to Discord.") 
     
 def register_commands() -> None:
     """command gets called to add commands to bot, used this way because of auto-unit-tests, but looks crappy.
@@ -207,7 +211,8 @@ def register_commands() -> None:
 
         # if no data ..
         if data:
-            new_vouch_nr = int(max(data.keys())) + 1
+            keys = list(data.keys())
+            new_vouch_nr = int(keys[-1])
         else:
             new_vouch_nr = 1
 
@@ -360,6 +365,7 @@ def run() -> None:
 
     client.activity=discord.Activity(type=discord.ActivityType(3), name=env_vars['activity_text'])
     client.run(env_vars["discord_token"])
+    
 
 if __name__ == "__main__":
     run()
