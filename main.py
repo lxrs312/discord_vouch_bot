@@ -16,11 +16,11 @@ import style as style
 logging.basicConfig(level=logging.INFO, format=style.logging_format)
 
 STAR_CHOICES = [
-    app_commands.Choice(name="⭐", value=1),
-    app_commands.Choice(name="⭐⭐", value=2),
-    app_commands.Choice(name="⭐⭐⭐", value=3),
-    app_commands.Choice(name="⭐⭐⭐⭐", value=4),
     app_commands.Choice(name="⭐⭐⭐⭐⭐", value=5),
+    app_commands.Choice(name="⭐⭐⭐⭐", value=4),
+    app_commands.Choice(name="⭐⭐⭐", value=3),
+    app_commands.Choice(name="⭐⭐", value=2),
+    app_commands.Choice(name="⭐", value=1),
 ]
 
 # both placesholders
